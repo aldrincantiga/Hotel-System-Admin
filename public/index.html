@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hotel Booking System</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      /* Basic styles for new buttons, assume styles.css exists */
+      .booking-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+        justify-content: flex-end; /* Align buttons to the right */
+      }
+
+      .btn-secondary,
+      .btn-danger {
+        padding: 8px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.9em;
+        transition: background-color 0.3s ease;
+      }
+
+      .btn-secondary {
+        background-color: #6c757d; /* Gray */
+        color: white;
+      }
+      .btn-secondary:hover {
+        background-color: #5a6268;
+      }
+
+      .btn-danger {
+        background-color: #dc3545; /* Red */
+        color: white;
+      }
+      .btn-danger:hover {
+        background-color: #c82333;
+      }
+
+      /* Styles for edit form within modal */
+      #edit-booking-form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+      #edit-booking-form input,
+      #edit-booking-form select,
+      #edit-booking-form textarea {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1em;
+      }
+      #edit-booking-form input:disabled {
+        background-color: #f0f0f0;
+        cursor: not-allowed;
+      }
+
+      /* MODAL SPECIFIC STYLES FOR SCROLLING AND RESPONSIVENESS */
+      .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1000; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        display: flex; /* Use flexbox for centering */
+        align-items: center; /* Center vertically */
+        justify-content: center; /* Center horizontally */
+      }
+
+      .modal-content {
+          background-color: #fefefe;
+          padding: 30px; /* Increased padding */
+          border-radius: 10px; /* More rounded corners */
+          max-width: 500px; /* Max width for content */
+          width: 90%; /* Make it responsive to width */
+          margin: 20px; /* Add some margin for smaller screens */
+          box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+          position: relative; /* Needed for positioning the close button */
+          display: flex;
+          flex-direction: column; /* Arrange content vertically */
+          max-height: 90vh; /* Limit modal height to 90% of viewport height */
+          overflow: hidden; /* Hide overflow on the modal content itself */
+      }
+
+      /* Ensure the modal body content can scroll */
+      #modal-body {
+          flex-grow: 1; /* Allows it to take available space */
+          overflow-y: auto; /* Enable vertical scrolling for the content */
+          padding-right: 15px; /* Add padding for scrollbar if present */
+          box-sizing: border-box; /* Include padding in element's total width and height */
+      }
+
+      .close {
+          color: #aaa;
+          font-size: 28px;
+          font-weight: bold;
+          position: absolute; /* Position relative to .modal-content */
+          top: 10px;
+          right: 15px;
+          cursor: pointer;
+      }
+
+      .close:hover,
+      .close:focus {
+          color: black;
+          text-decoration: none;
+          cursor: pointer;
+      }
+
+      /* Styles for the buttons within the modal form (e.g., Save Changes, Cancel) */
+      #edit-booking-form .btn-primary,
+      #edit-booking-form .btn-secondary {
+        width: auto; /* Allow buttons to size naturally */
+        flex-grow: 1; /* Allow them to grow */
+      }
+
+      #edit-booking-form > div { /* This targets the button container */
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 20px;
+        padding-top: 10px; /* Add some space above buttons */
+        border-top: 1px solid #eee; /* Optional: a separator line */
+        flex-shrink: 0; /* Prevent button container from shrinking */
+      }
+
+      /* LOGIN FORM STYLES */
+      #login-section {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: calc(100vh - 100px); /* Adjust based on header height */
+        background-color: #f4f7f6;
+      }
+
+      .login-container {
+        background: #ffffff;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        width: 100%;
+        max-width: 400px;
+      }
+
+      .login-container h2 {
+        margin-bottom: 25px;
+        color: #333;
+        font-size: 2em;
+      }
+
+      .login-container .input-group {
+        margin-bottom: 20px;
+      }
+
+      .login-container input[type="text"],
+      .login-container input[type="password"] {
+        width: calc(100% - 20px); /* Adjust for padding */
+        padding: 12px 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1em;
+      }
+
+      .login-container .btn-primary {
+        width: 100%;
+        padding: 12px;
+        font-size: 1.1em;
+        margin-top: 15px;
+        background-color: #007bff;
+        border: none;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      .login-container .btn-primary:hover {
+        background-color: #0056b3;
+      }
+
+      .login-message {
+        margin-top: 15px;
+        font-weight: bold;
+      }
+
+      .login-message.error {
+        color: #e74c3c;
+      }
+
+      .login-message.success {
+        color: #28a745;
+      }
+
+      /* Ensure only one section is active at a time */
+      .section:not(.active) {
+        display: none !important; /* Added !important for stronger precedence */
+      }
+
+      /* Hide header and nav when login is active */
+      body.login-active header,
+      body.login-active nav {
+        display: none;
+      }
+
+      body.login-active main {
+          margin-top: 0; /* Remove top margin from main when login is active */
+      }
+
+
+    </style>
+  </head>
+  <body class="login-active"> <!-- Add login-active class to body initially -->
+    <header>
+      <h1>Hotel Booking & Reservation System</h1>
+      <nav>
+        <button onclick="showSection('system-status')" class="nav-btn">
+          System Status
+        </button>
+        <button onclick="showSection('rooms')" class="nav-btn">
+          Available Rooms
+        </button>
+        <button onclick="showSection('add-room')" class="nav-btn">
+          Add Room
+        </button>
+        <button onclick="showSection('booking')" class="nav-btn">
+          Make Booking
+        </button>
+        <button onclick="showSection('bookings')" class="nav-btn">
+          View Bookings
+        </button>
+        <button id="logout-btn" class="nav-btn" style="background-color: #f44336; color: white;">
+          Logout
+        </button>
+      </nav>
+    </header>
+
+    <main>
+      <!-- Login Section (New) -->
+      <section id="login-section" class="section active">
+        <div class="login-container">
+          <h2>Admin Login</h2>
+          <form id="login-form">
+            <div class="input-group">
+              <input type="text" id="username" placeholder="Username" required />
+            </div>
+            <div class="input-group">
+              <input type="password" id="password" placeholder="Password" required />
+            </div>
+            <button type="submit" class="btn-primary">Login</button>
+            <p id="login-message" class="login-message"></p>
+          </form>
+        </div>
+      </section>
+
+      <!-- System Status Section - NO 'active' CLASS HERE -->
+      <section id="system-status" class="section">
+        <h2>System Status & Statistics</h2>
+        <div class="status-container">
+          <div class="status-grid">
+            <div class="status-card" id="api-status">
+              <h3>API Status</h3>
+              <div class="status-indicator" id="api-indicator">Checking...</div>
+              <p id="api-details">Loading...</p>
+            </div>
+
+            <div class="status-card" id="db-status">
+              <h3>Database Status</h3>
+              <div class="status-indicator" id="db-indicator">Checking...</div>
+              <p id="db-details">Loading...</p>
+            </div>
+          </div>
+
+          <div class="stats-section">
+            <h3>System Statistics</h3>
+            <div class="stats-grid" id="stats-grid">Loading statistics...</div>
+          </div>
+
+          <div class="tables-section">
+            <h3>Database Tables</h3>
+            <div id="tables-info">Loading table information...</div>
+          </div>
+
+          <button onclick="refreshSystemStatus()" class="btn-primary">
+            Refresh Status
+          </button>
+        </div>
+      </section>
+
+      <!-- Available Rooms Section - NO 'active' CLASS HERE -->
+      <section id="rooms" class="section">
+        <h2>Available Rooms</h2>
+        <div id="rooms-grid" class="rooms-grid"></div>
+      </section>
+
+      <!-- Add Room Section - NO 'active' CLASS HERE -->
+      <section id="add-room" class="section">
+        <h2>Add New Room</h2>
+        <div class="add-room-container">
+          <form id="add-room-form" class="form-section">
+            <h3>Room Details</h3>
+            <input
+              type="text"
+              name="room_number"
+              placeholder="Room Number (e.g., 101)"
+              required
+            />
+            <select name="room_type" required>
+              <option value="">Select Room Type</option>
+              <option value="single">Single</option>
+              <option value="double">Double</option>
+              <option value="suite">Suite</option>
+              <option value="deluxe">Deluxe</option>
+            </select>
+            <input
+              type="number"
+              name="price_per_night"
+              placeholder="Price per Night"
+              step="0.01"
+              min="0"
+              required
+            />
+            <input
+              type="number"
+              name="capacity"
+              placeholder="Room Capacity"
+              min="1"
+              required
+            />
+            <textarea
+              name="amenities"
+              placeholder="Room Amenities (e.g., WiFi, TV, AC)"
+              rows="3"
+              required
+            ></textarea>
+            <button type="submit" class="btn-primary">Add Room</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Booking Form Section - NO 'active' CLASS HERE -->
+      <section id="booking" class="section">
+        <h2>Make a Reservation</h2>
+        <div class="booking-container">
+          <form id="customer-form" class="form-section">
+            <h3>Customer Information</h3>
+            <input
+              type="text"
+              name="first_name"
+              placeholder="First Name"
+              required
+            />
+            <input
+              type="text"
+              name="last_name"
+              placeholder="Last Name"
+              required
+            />
+            <input type="email" name="email" placeholder="Email" required />
+            <input type="tel" name="phone" placeholder="Phone Number" />
+            <textarea name="address" placeholder="Address" rows="3"></textarea>
+          </form>
+
+          <form id="booking-form" class="form-section">
+            <h3>Booking Details</h3>
+            <select name="room_id" required>
+              <option value="">Select Room</option>
+            </select>
+            <input type="date" name="check_in_date" required />
+            <input type="date" name="check_out_date" required />
+            <textarea
+              name="special_requests"
+              placeholder="Special Requests"
+              rows="3"
+            ></textarea>
+            <button type="submit" class="btn-primary">Book Now</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Bookings List Section - NO 'active' CLASS HERE -->
+      <section id="bookings" class="section">
+        <h2>Current Bookings</h2>
+        <div id="bookings-list" class="bookings-list"></div>
+      </section>
+    </main>
+
+    <div id="modal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <div id="modal-body"></div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
